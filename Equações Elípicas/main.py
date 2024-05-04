@@ -11,7 +11,7 @@ def analyticalSol(r, theta, n):
         val += 1.0/ (2.0 * i - 1.0) * r ** (2.0 * i - 1.0) * np.sin((2.0 * i - 1.0) * theta)
     return (400.0 / np.pi ) * val
 
-n = 100
+n = 50
 nr = n
 nth = n
 fig = plt.figure()

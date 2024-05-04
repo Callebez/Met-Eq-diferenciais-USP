@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.sparse import diags, dia_matrix, block_diag, bmat, hstack, vstack
 from scipy.sparse.linalg import spsolve
 import pprint
-n = 100
+n = 10
 dr = 1.0/n
 dp = np.pi/n
 ri = np.linspace(dr, 1,n,True)
@@ -13,7 +13,7 @@ def Tmatrix(n):
     ri = np.linspace(dr,1,n)
     T_main_diag = -2.0* (1. / dr**2  + 1./(ri ** 2 * dp**2))
     T_upper_diag = 1./dr**2 + 1./(2 * ri[:n-1] * dr)
-    T_lower_diag = 1./dr**2 - 1./(2 * ri[1:n] * dr)
+    T_lower_diag = 1./dr**2 - 1./(2 * ri[:n-1] * dr)
     data = [T_main_diag, T_upper_diag , T_lower_diag]
     Ts = diags(data,[0,1,-1])
     return Ts
@@ -53,7 +53,7 @@ B = A+Gsup+Ginf
 # matprint(B.toarray())
 
 b = np.zeros(n)
-b[-1] = -100./(dp**2)
+b[-1] = -100.
 
 v1 = np.array(b)
 for i in range(m):
