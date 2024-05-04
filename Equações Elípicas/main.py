@@ -11,7 +11,7 @@ def analyticalSol(r, theta, n):
         val += 1.0/ (2.0 * i - 1.0) * r ** (2.0 * i - 1.0) * np.sin((2.0 * i - 1.0) * theta)
     return (400.0 / np.pi ) * val
 
-n = 5
+n = 100
 nr = n
 nth = n
 fig = plt.figure()
@@ -31,17 +31,17 @@ def createA(n):
     A += np.diag(np.ones(n*n-n), n) + np.diag(np.ones(n*n-n), -n)
     return A/h**2
 
-b=np.zeros(n*n)
-b[n*n-n-1:] = -100.0/h**2
+# b=np.zeros(n*n)
+# b[n*n-n-1:] = -100.0/h**2
 
-# b = b.reshape(n*n)
-print(b)
-x = np.linalg.solve(createA(n),b)
-# # print(x[0:n])
-# x[0:n] = 0
-X = x.reshape((n,n))
+# # b = b.reshape(n*n)
+# # print(b)
+# x = np.linalg.solve(createA(n),b)
+# # # print(x[0:n])
+# # x[0:n] = 0
+# X = x.reshape((n,n))
 
-# # print(X)
-ax.plot_surface(T, R, X)
-# print()
+# # # print(X)
+# ax.plot_surface(T, R, X)
+# # print()
 plt.show()
