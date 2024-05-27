@@ -9,8 +9,8 @@ Lx, Ly = 1.0, 1.0  # Domain size
 nx, ny = 50, 50  # Number of control volumes in x and y directions
 dx, dy = Lx / (nx+1), Ly / (ny+1)  # Control volume sizes
 alpha = 1.0  # Diffusion coefficient
-dt = 0.01 * min(dx**2, dy**2) / alpha  # Time step size (CFL condition)
-T = 2.4  # Total time
+dt = 0.25 * min(dx**2, dy**2) / alpha  # Time step size (CFL condition)
+T = 1.2  # Total time
 Nt = int(T / dt)  # Number of time steps
 
 def Tmatrix(nx, ny):
