@@ -18,7 +18,7 @@ def laplacian(n):
 def heat_source(x,y):
     xs = 1.0 / 2.0 
     ys = 1.0 / 2.0
-    w = 0.5
+    w = 0.2
     return np.exp(-((x-xs)**2+(y-ys)**2)/w**2)
 
 m = 10
@@ -47,7 +47,7 @@ nx, ny = m, m  # Number of control volumes in x and y directions
 dx, dy = Lx / (nx+1), Ly / (ny+1)  # Control volume si
 alpha = 1.0
 dt = 0.25 * min(dx**2, dy**2) / alpha  # Time step size (CFL condition)
-T = 0.01
+T = 0.1
 Nt = int(T / dt)  # Number of time steps
 
 # dt = 0.01 
@@ -56,7 +56,9 @@ for n in range(Nt):
     q_flat = Q[1:-1, 1:-1].flatten()
     
     # Solve for the new time step
-    q_flat_new = q_flat + dt * (heating_plate(q_flat, n*dt))
+    aux = heating_plate(q_flat, n*dt)
+    q_flat_new = q_flat + dt * (aux)
+    q_flat_new = q_flat + 0.5 * dt * ((aux) + heating_plate(q_flat_new, n*dt))
     
     # Reshape back to 2D array
     q_new[1:-1, 1:-1] = q_flat_new.reshape((m, m))
