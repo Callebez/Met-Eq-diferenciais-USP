@@ -20,8 +20,8 @@ def g(t):
 
 def laplacian_Dirichlet(n, d, k):
     main_diag = -2 * np.ones(n) 
-    main_diag[0] = -d**2/k
-    main_diag[-1] = -d**2/k
+    main_diag[0] = -d**2#/k
+    main_diag[-1] = -d**2#/k
     lower_diag =  np.ones(n-1)  
     upper_diag =  np.ones(n-1)  
     upper_diag[0] = 0.0
@@ -53,19 +53,22 @@ def heat_equation_heterogeneous(nx, ny, Lx, Ly, time, dt):
     y = np.linspace(0, Ly, ny + 2)
     X, Y = np.meshgrid(x, y)
     S = heat_source_uniform(X, Y)
+    S[:,0] = 0.0
+    S[:,-1] = 0.0
+    S[-1,:] = 0.0
+    S[0,:] = 0.0
     S = S.flatten()
     Q = np.zeros((nx+2)*(ny+2))
-    print(Nt)
-    Q[0::nx+2]  = - 1                                          # Right boundary
-    Q[nx+1::nx+2] = - 1                                        # Left boundary
-    Q[:nx+2]  = 1./ np.pi * np.sin(np.pi * x)                  # Bottom boundary
-    Q[-(nx+2):]  = 1./ (3 * np.pi) * np.sin(3 * np.pi * x) + 1 # Top boundary
+    # Q[0::nx+2]  = - 1                                          # Right boundary
+    # Q[nx+1::nx+2] = - 1                                        # Left boundary
+    # Q[:nx+2]  = 1./ np.pi * np.sin(np.pi * x)                  # Bottom boundary
+    # Q[-(nx+2):]  = 1./ (3 * np.pi) * np.sin(3 * np.pi * x) + 1 # Top boundary
     for i in range(Nt):
         
-        Q[0::nx+2]  = - 2                                          # Right boundary
-        Q[nx+1::nx+2] = - 2                                        # Left boundary
+        Q[0::nx+2]  = - 1                                          # Right boundary
+        Q[nx+1::nx+2] = - 1                                        # Left boundary
         Q[:nx+2]  = 1./ np.pi * np.sin(np.pi * x)                  # Bottom boundary
-        Q[-(nx+2):]  = 1./ (3 * np.pi) * np.sin(3 * np.pi * x) + 2 # Top boundary
+        Q[-(nx+2):]  = 1./ (3 * np.pi) * np.sin(3 * np.pi * x) + 1 # Top boundary
         # Q = la.spsolve(A, Q +  dt * S )
         # Solve for the new time step
         q_flat_new_aux = la.spsolve(Ax, Q + 0.5 * dt * S)
@@ -78,12 +81,12 @@ def heat_equation_heterogeneous(nx, ny, Lx, Ly, time, dt):
 
 def laplacian_Neumann(n, d, dt):
     main_diag = -2 * np.ones(n) 
-    main_diag[0] =  - 2.
-    main_diag[-1] = - 2. 
+    main_diag[0] =  - 2.0 * d**2
+    main_diag[-1] = - 2.0 * d**2
     lower_diag =  np.ones(n-1)  
     upper_diag =  np.ones(n-1)  
-    upper_diag[0] =  2.  
-    lower_diag[-1] =  2. 
+    upper_diag[0] =  2.0 * d**2
+    lower_diag[-1] =  2.0 * d**2
     return diags([lower_diag, main_diag, upper_diag], [-1, 0, 1], shape=(n,n))/d**2
 
 def heat_equation_uniformNeumann(nx, ny, Lx, Ly, time, dt):
@@ -119,10 +122,10 @@ def heat_equation_uniformNeumann(nx, ny, Lx, Ly, time, dt):
         # Solve for the new time step
         
         ### Using a coupled laplacian      
-        Q = la.spsolve(A, Q + dt * S)
+        # Q = la.spsolve(A, Q + dt * S)
         ### Uncoupled Laplacian 
-        # q_new_aux = la.spsolve(Ax, Q + dt / 2 * S)
-        # Q = la.spsolve(Ay, q_new_aux + dt / 2 * S)
+        q_new_aux = la.spsolve(Ax, Q + dt / 2 * S)
+        Q = la.spsolve(Ay, q_new_aux + dt / 2 * S)
 
     Q = Q.reshape((nx+2, ny+2))
     return X, Y, Q
@@ -163,7 +166,6 @@ def heat_equation_deltaNeumann(nx, ny, Lx, Ly, time, dt):
     for i in range(Nt):     
         
         # Solve for the new time step
-        # Fixed cell 
          
         S = np.zeros_like(Q)
         t = i * dt
@@ -172,24 +174,24 @@ def heat_equation_deltaNeumann(nx, ny, Lx, Ly, time, dt):
             S[index] = g(t)
 
         ### Using a coupled laplacian      
-        Q = la.spsolve(A, Q + dt * S)
+        # Q = la.spsolve(A, Q + dt * S)
       
         # Q = Q_new
         ### Uncoupled Laplacian     
-        # q_new_aux = la.spsolve(Ax, Q + dt / 2.0 * S)
+        q_new_aux = la.spsolve(Ax, Q + dt / 2.0 * S)
         # S = np.zeros_like(Q)
         # t = i * dt
         # if t < 0.25:
         #     index = (i_s - 1) * nx + (j_s - 1)
         #     S[index] = g(t)
-        # Q = la.spsolve(Ay, q_new_aux + dt / 2.0 * S)
+        Q = la.spsolve(Ay, q_new_aux + dt / 2.0 * S)
         
     Q = Q.reshape((nx+2, ny+2))
     return X, Y, Q
 
 def spatialError(max_power, time_iterations, func):
-    # dt = 1./40.
-    dt = 5e-1
+    # dt = 1./45.
+    dt = 5e-3
     n = 3**max_power
     m = math.ceil(n/2)
     total_time = dt*time_iterations
@@ -237,17 +239,18 @@ def temporalError(max_power, total_time, func):
 
 nx = 81
 ny = 81
-dt = 1/(nx+1)**2
+dt = 0.001
 Lx = 1.0
 Ly = 1.0
-# X, Y, Q = heat_equation_heterogeneous(nx, ny, Lx, Ly, 0.25, dt)
+# X, Y, Q = heat_equation_deltaNeumann(nx, ny, Lx, Ly, .251, dt)
 # fig = plt.figure()
 # ax = fig.add_subplot(projection='3d')
 # ax.plot_surface(X,Y,Q)
 # plt.show()
 
 # X1, Y1, Q1 = heat_equation_heterogeneous(nx, ny, Lx, Ly, 5.0)
-h, error = temporalError(7, 0.1, heat_equation_deltaNeumann)
+h, error = temporalError(7, 0.2, heat_equation_uniformNeumann)
+# h, error = spatialError(7, 10, heat_equation_uniformNeumann)
 plt.title("Convergência para fonte uniforme \n e condições de Dirichlet ($h = 0.05$)")
 plt.loglog(h, error, '*')
 plt.loglog(h, h, label=r"h")
