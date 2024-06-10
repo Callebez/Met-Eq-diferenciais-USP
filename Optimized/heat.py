@@ -13,7 +13,7 @@ def laplacian(n):
 def heat_source_uniform(x,y):
     xs = 1.0 / 2.0 
     ys = 1.0 / 2.0
-    w = 0.2
+    w = 0.25
     return np.exp(-((x-xs)**2+(y-ys)**2)/w**2)
 def g(t):
     return 2.0 if t < 0.25 else 0.0
@@ -114,18 +114,23 @@ def heat_equation_uniformNeumann(nx, ny, Lx, Ly, time, dt):
     X, Y = np.meshgrid(x, y)
     S = heat_source_uniform(X, Y)
     
-    S = S.flatten()    
     Q = np.zeros((nx+2)*(ny+2))
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.plot_surface(X,Y, S)
+    plt.show()
+    S = S.flatten()    
 
     print(dt, time, Nt)
     for i in range(Nt):     
         # Solve for the new time step
         
         ### Using a coupled laplacian      
-        # Q = la.spsolve(A, Q + dt * S)
+        Q = la.spsolve(A, Q + dt * S)
+
         ### Uncoupled Laplacian 
-        q_new_aux = la.spsolve(Ax, Q + dt / 2 * S)
-        Q = la.spsolve(Ay, q_new_aux + dt / 2 * S)
+        # q_new_aux = la.spsolve(Ax, Q + dt / 2 * S)
+        # Q = la.spsolve(Ay, q_new_aux + dt / 2 * S)
 
     Q = Q.reshape((nx+2, ny+2))
     return X, Y, Q
@@ -237,30 +242,30 @@ def temporalError(max_power, total_time, func):
         erro.append(np.abs(Q[m,m] - refValue))
     return h, erro
 
-nx = 81
-ny = 81
-dt = 0.001
+nx = 21
+ny = 21
+dt = 1e-1
 Lx = 1.0
 Ly = 1.0
-# X, Y, Q = heat_equation_deltaNeumann(nx, ny, Lx, Ly, .251, dt)
-# fig = plt.figure()
-# ax = fig.add_subplot(projection='3d')
-# ax.plot_surface(X,Y,Q)
-# plt.show()
+X, Y, Q = heat_equation_uniformNeumann(nx, ny, Lx, Ly, 500.0, dt)
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.plot_surface(X,Y,Q)
+plt.show()
 
 # X1, Y1, Q1 = heat_equation_heterogeneous(nx, ny, Lx, Ly, 5.0)
-h, error = temporalError(7, 0.2, heat_equation_uniformNeumann)
-# h, error = spatialError(7, 10, heat_equation_uniformNeumann)
-plt.title("Convergência para fonte uniforme \n e condições de Dirichlet ($h = 0.05$)")
-plt.loglog(h, error, '*')
-plt.loglog(h, h, label=r"h")
-plt.loglog(h,np.power(h, 2), label=r"h^2")
-# plt.loglog(h,np.power(h, 3), label=r"h^3")
-plt.xlabel(r"$log(dt)$")
-plt.ylabel(r"$Log(|E|)$ no ponto $(0.5,0.5)$")
-plt.legend()
-plt.grid()
-plt.show()
+# h, error = temporalError(7, 0.2, heat_equation_uniformNeumann)
+# # h, error = spatialError(7, 10, heat_equation_uniformNeumann)
+# plt.title("Convergência para fonte uniforme \n e condições de Dirichlet ($h = 0.05$)")
+# plt.loglog(h, error, '*')
+# plt.loglog(h, h, label=r"h")
+# plt.loglog(h,np.power(h, 2), label=r"h^2")
+# # plt.loglog(h,np.power(h, 3), label=r"h^3")
+# plt.xlabel(r"$log(dt)$")
+# plt.ylabel(r"$Log(|E|)$ no ponto $(0.5,0.5)$")
+# plt.legend()
+# plt.grid()
+# plt.show()
 
 # fig = plt.figure(figsize=plt.figaspect(0.5))
 # fig.suptitle("Distribuição de calor uniforme \n Condições de fronteira de Dirichlet")
